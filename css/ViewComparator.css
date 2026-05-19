@@ -1,0 +1,5 @@
+/* host-page placement helpers for <view-comparator> */
+view-comparator {
+  display: inline-block;
+  margin: 0.5rem;
+}

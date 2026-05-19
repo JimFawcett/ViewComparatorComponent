@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ViewComparator Component Test</title>
+  <link rel="stylesheet" href="../css/prism.css">
+  <link rel="stylesheet" href="css/ViewComparator.css">
+  <script src="../js/prism.js" defer></script>
+  <script src="js/ViewComparator.js" defer></script>
+  <style>
+    :root {
+      --light: #f0f0f0;
+      --dark:  #333;
+    }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      max-width: 70rem;
+    }
+    p { max-width: 60rem; line-height: 1.5; margin: 0.75rem 0; }
+    h2, h3 { margin-top: 1.5rem; }
+    .caption { font-size: 0.85rem; color: #555; margin: 0.25rem 0 1rem 0.5rem; }
+    .bottom-spacer { height: 3rem; }
+  </style>
+</head>
+<body>
+
+  <h2>ViewComparator Component Test</h2>
+
+  <p>
+    Drag the bar to redistribute panel widths. Click the left panel to grow it;
+    click the right panel to grow it. Total component width does not change.
+  </p>
+  <p>
+    Three small buttons (▲ 0 ▼) appear near the top-right corner of the right panel.
+    They are faint until hovered or until the right panel has focus.
+    ▼ adds space above the right panel's content, shifting it down.
+    ▲ removes space, shifting it back up. 0 resets to no offset.
+    With the right panel focused (click anywhere in it), Alt+↓ and Alt+↑ do the same;
+    Escape resets. The step size defaults to 20 px and is configurable via
+    <code>offset-step-px</code>.
+  </p>
+
+  <h3>Plain text panels</h3>
+
+  <view-comparator width="60rem" height="10rem">
+    <pre slot="left">Left panel — plain text.
+
+Drag the splitter bar left or right
+to redistribute panel widths.
+
+Click this panel to grow it by one step.
+Each click transfers 40px from right to left.</pre>
+    <pre slot="right">Right panel — plain text.
+
+Click this panel to grow it by one step.
+Each click transfers 40px from left to right.
+
+The total component width stays fixed at 60rem.</pre>
+  </view-comparator>
+
+  <p class="caption">Figure 1. Two plain-text panels, equal initial split.</p>
+
+  <h3>Code panels with Prism highlighting — C++ vs Rust</h3>
+
+  <p>Same algorithm expressed in each language. Both panels scroll independently.</p>
+
+  <view-comparator width="64rem" highlight="prism" left-ratio="0.5" bar-color="#666">
+    <pre slot="left"><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;numeric&gt;
+#include &lt;algorithm&gt;
+
+int main() {
+    std::vector&lt;int&gt; v = {5, 3, 8, 1, 9, 2, 7};
+
+    std::sort(v.begin(), v.end());
+
+    int sum = std::accumulate(v.begin(), v.end(), 0);
+    double avg = static_cast&lt;double&gt;(sum) / v.size();
+
+    std::cout &lt;&lt; "sorted: ";
+    for (int x : v) std::cout &lt;&lt; x &lt;&lt; " ";
+    std::cout &lt;&lt; "\nsum = " &lt;&lt; sum
+              &lt;&lt; "  avg = " &lt;&lt; avg &lt;&lt; "\n";
+    return 0;
+}
+    </code></pre>
+    <pre slot="right"><code class="language-rust">
+fn main() {
+    let mut v = vec![5, 3, 8, 1, 9, 2, 7];
+
+    v.sort();
+
+    let sum: i32 = v.iter().sum();
+    let avg = sum as f64 / v.len() as f64;
+
+    print!("sorted: ");
+    for x in &v { print!("{x} "); }
+    println!("\nsum = {sum}  avg = {avg}");
+}
+    </code></pre>
+  </view-comparator>
+
+  <p class="caption">Figure 2. C++ (left) and Rust (right) with Prism highlighting, fixed height with scroll.</p>
+
+  <h3>Asymmetric initial split — 30/70</h3>
+
+  <view-comparator width="60rem" height="14rem" highlight="prism" left-ratio="0.30" bar-color="#555" bar-width="8px">
+    <pre slot="left"><code class="language-javascript">
+// module pattern
+const counter = (() => {
+  let _n = 0;
+  return {
+    inc: () => ++_n,
+    dec: () => --_n,
+    val: () => _n,
+  };
+})();
+
+console.log(counter.inc()); // 1
+console.log(counter.inc()); // 2
+console.log(counter.dec()); // 1
+    </code></pre>
+    <pre slot="right"><code class="language-css">
+/* component container */
+.container {
+  display: flex;
+  flex-direction: row;
+  border: 2px solid var(--dark, #333);
+  box-shadow: 5px 5px 5px #999;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.panel-left  { flex: none; }
+.panel-right { flex: 1; min-width: 0; }
+
+.splitter {
+  flex: none;
+  cursor: col-resize;
+  user-select: none;
+}
+    </code></pre>
+  </view-comparator>
+
+  <p class="caption">Figure 3. 30/70 initial split, wider splitter bar (8px), JavaScript and CSS panels.</p>
+
+  <h3>Mismatched content length — offset demo</h3>
+
+  <p>
+    The left panel has many lines; the right has only a few. Use ▼ (or Alt+↓ with the
+    right panel focused) to push the right panel's content down until the desired lines
+    align. Press 0 or Escape to reset.
+  </p>
+
+  <view-comparator width="60rem" height="16rem" highlight="prism" left-ratio="0.5">
+    <pre slot="left"><code class="language-cpp">
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;numeric&gt;
+#include &lt;string&gt;
+#include &lt;sstream&gt;
+
+// Format a vector as a comma-separated string.
+template&lt;typename T&gt;
+std::string join(const std::vector&lt;T&gt;&amp; v) {
+    std::ostringstream oss;
+    for (std::size_t i = 0; i &lt; v.size(); ++i) {
+        if (i) oss &lt;&lt; ", ";
+        oss &lt;&lt; v[i];
+    }
+    return oss.str();
+}
+
+int main() {
+    std::vector&lt;int&gt; v = {9, 3, 7, 1, 5};
+    std::sort(v.begin(), v.end());
+    int  sum = std::accumulate(v.begin(), v.end(), 0);
+    double avg = static_cast&lt;double&gt;(sum) / v.size();
+    std::cout &lt;&lt; "sorted: " &lt;&lt; join(v) &lt;&lt; "\n";
+    std::cout &lt;&lt; "sum=" &lt;&lt; sum &lt;&lt; "  avg=" &lt;&lt; avg &lt;&lt; "\n";
+}
+    </code></pre>
+    <pre slot="right"><code class="language-python">
+v = sorted([9, 3, 7, 1, 5])
+avg = sum(v) / len(v)
+print(f"sorted: {v}")
+print(f"sum={sum(v)}  avg={avg}")
+    </code></pre>
+  </view-comparator>
+
+  <p class="caption">Figure 4. Long C++ left panel vs. short Python right panel — use offset controls to align.</p>
+
+  <div class="bottom-spacer"></div>
+</body>
+</html>
