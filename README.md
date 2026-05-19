@@ -1,102 +1,94 @@
-# ViewCodeComponent
+# ViewComparatorComponent
 
-A W3C custom element (`<view-code>`) that displays a titled, bordered code panel. Users click the panel body to widen it and click the title bar to narrow it, one step per click.
+A W3C custom element (`<view-comparator>`) that displays two side-by-side panels separated by a draggable splitter bar. Designed for comparing code or text across languages, versions, or styles.
 
 ## Files
 
 ```
-ViewCodeComponent/
-  js/ViewCode.js           component definition
-  css/ViewCode.css         host-page placement helpers
-  ViewCodeComponent.html   demo / test page
-  SpecViewCodeComponent.md design specification
-```
-
-## Setup
-
-Load the component script (and optionally Prism for syntax highlighting):
-
-```html
-<link rel="stylesheet" href="../css/prism.css">
-<link rel="stylesheet" href="css/ViewCode.css">
-<script src="../js/prism.js" defer></script>
-<script src="js/ViewCode.js" defer></script>
-```
-
-The containing page must define `--light` and `--dark` CSS custom properties for the default color scheme:
-
-```css
-:root {
-  --light: #f0f0f0;
-  --dark:  #333;
-}
+ViewComparatorComponent/
+  js/
+    ViewComparator.js           component definition
+  css/
+    ViewComparator.css          host-page placement helpers
+  ViewComparatorComponent.html  demo / test page
+  SpecComparatorComponent.md    detailed specification
+  README.md                     this file
 ```
 
 ## Usage
 
-![ViewCodeComponent](pictures/ViewCodeComponent.png)
-
-### Plain text
-
-Wrap content in a `<template slot="code">` to display it as literal text:
+![ViewComparatorComponent](pictures/ViewComparatorComponent.png)
 
 ```html
-<view-code width="35rem" trim normalize-indent style="float:right;">
-  Figure 1. HTML fragment
-  <template slot="code">
-    <div class="example">
-      <p>Hello</p>
-    </div>
-  </template>
-</view-code>
+<link rel="stylesheet" href="css/ViewComparator.css">
+<script src="js/ViewComparator.js" defer></script>
+
+<view-comparator width="60rem" height="20rem" left-ratio="0.5">
+  <pre slot="left">Left panel content.</pre>
+  <pre slot="right">Right panel content.</pre>
+</view-comparator>
 ```
 
-### Prism syntax highlighting
-
-Supply a `<pre><code class="language-...">` in the `slot="code"`:
+With Prism syntax highlighting:
 
 ```html
-<view-code highlight="prism" language="javascript" width="50rem" trim normalize-indent>
-  Figure 2. Counter module
-  <pre slot="code"><code class="language-javascript">
-    const counter = (() => {
-      let _n = 0;
-      return { inc: () => ++_n, val: () => _n };
-    })();
-  </code></pre>
-</view-code>
+<link rel="stylesheet" href="../css/prism.css">
+<script src="../js/prism.js" defer></script>
+<script src="js/ViewComparator.js" defer></script>
+
+<view-comparator width="70rem" height="24rem" highlight="prism" left-ratio="0.5">
+  <pre slot="left"><code class="language-cpp">// C++ code</code></pre>
+  <pre slot="right"><code class="language-rust">// Rust code</code></pre>
+</view-comparator>
 ```
 
 ## Attributes
 
-| Attribute          | Default         | Description                                              |
-|--------------------|-----------------|----------------------------------------------------------|
-| `width`            | `max-content`   | Initial width of the view (any CSS length)               |
-| `height`           | `auto`          | Height of the code panel; enables vertical scroll        |
-| `overflow-x`       | `auto`          | Horizontal overflow: `auto`, `scroll`, or `hidden`       |
-| `bg-color`         | `var(--light)`  | Background of the view box                               |
-| `title-bg-color`   | `#aaa`          | Background of the title bar                              |
-| `background-color` | `var(--light)`  | Background of the code panel                             |
-| `color`            | `var(--dark)`   | Text color of the code panel                             |
-| `font-family`      | (inherit)       | Font family for the code panel                           |
-| `font-size`        | (inherit)       | Font size for the code panel                             |
-| `code-padding`     | `0.75rem 1rem`  | Padding inside the code panel                            |
-| `highlight`        | (none)          | Set to `prism` to enable Prism.js syntax highlighting    |
-| `language`         | (none)          | Prism language, e.g. `javascript`, `cpp`, `css`          |
-| `trim`             | false           | Strip leading/trailing blank lines from content          |
-| `normalize-indent` | false           | Remove common leading whitespace from all lines          |
-| `step-px`          | `40`            | Pixels added or removed per width click                  |
-| `min-width`        | `240`           | Minimum width in pixels when narrowing                   |
+| Attribute        | Default        | Description                                          |
+|------------------|----------------|------------------------------------------------------|
+| `width`          | auto           | Total component width (any CSS length)               |
+| `height`         | auto           | Panel height                                         |
+| `left-ratio`     | 0.5            | Initial fraction of width given to the left panel    |
+| `bar-width`      | 6px            | Width of the splitter bar                            |
+| `bar-color`      | #888           | Color of the splitter bar                            |
+| `bg-color`       | var(--light)   | Background of both panels                            |
+| `color`          | var(--dark)    | Foreground (text) color of both panels               |
+| `overflow-x`     | auto           | Horizontal overflow: `auto`, `scroll`, or `hidden`   |
+| `code-padding`   | 0.75rem 1rem   | Padding inside each panel                            |
+| `highlight`      | (none)         | Set to `prism` to enable Prism.js highlighting       |
+| `step-px`        | 40             | Pixels transferred per panel-click width adjustment  |
+| `min-panel-px`   | 120            | Minimum width in pixels for either panel             |
+| `min-height-px`  | 80             | Minimum height in pixels                             |
+| `offset-step-px` | 40             | Pixels shifted per right-panel offset action         |
 
-## Interaction
+## Interactions
 
-- **Click code panel** — widens by `step-px` pixels.
-- **Click title bar** — narrows by `step-px` pixels, down to `min-width`.
+### Panel width
 
-Width is tracked on the outer view box. The inner `<pre>` always fills it at `width: 100%`, so the panel tracks correctly even when content overflows.
+- **Drag the splitter bar** left or right to redistribute width between panels.
+- **Click the left panel** to grow it by `step-px`; click the right panel to grow it.
 
-## Inline Style Notes
+### Component height
 
-- `font-size` is an inherited property and cascades through the shadow DOM boundary, so `style="font-size: 0.9rem"` on the element works.
-- `height` does not inherit. Use the `height` attribute — do not set it via inline style.
-- `--title-font-size` is a CSS custom property that controls the title bar font size (default `1rem`). Set it on the element or in page CSS: `style="--title-font-size: 1.2rem"`.
+- **Drag the resizer strip** at the bottom edge to change the component height.
+
+### Right-panel vertical offset
+
+When comparing content of unequal length, the right panel's content can be shifted down to align specific lines with the left panel. Space added above the content inherits the content's own background color.
+
+| Action | Effect |
+|--------|--------|
+| Click **▼** button | Shift right content down by `offset-step-px` |
+| Click **▲** button | Shift right content up by `offset-step-px` |
+| Click **0** button | Reset offset to zero |
+| **Alt+↓** (right panel focused) | Same as ▼ |
+| **Alt+↑** (right panel focused) | Same as ▲ |
+| **Escape** (right panel focused) | Same as 0 |
+
+The ▲ 0 ▼ buttons appear near the top-right corner of the right panel. They are faint until hovered or until the right panel has focus (click anywhere in it).
+
+## Dependencies
+
+- **Prism.js** — optional; required only when `highlight="prism"` is set.
+  Load `prism.js` and `prism.css` before the component script.
+- No other runtime dependencies.
