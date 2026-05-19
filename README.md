@@ -17,6 +17,8 @@ ViewComparatorComponent/
 
 ## Usage
 
+![ViewComparatorComponent](pictures/ViewComparatorComponent.png)
+
 ```html
 <link rel="stylesheet" href="css/ViewComparator.css">
 <script src="js/ViewComparator.js" defer></script>
